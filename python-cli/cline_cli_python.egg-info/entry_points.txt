@@ -1,2 +1,0 @@
-[console_scripts]
-cline-py = cline_cli.main:cli
