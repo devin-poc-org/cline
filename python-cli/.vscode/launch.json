@@ -1,0 +1,117 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Cline CLI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cline_cli.main",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": []
+        },
+        {
+            "name": "Python: Cline CLI with Args",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cline_cli.main",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "task",
+                "list"
+            ]
+        },
+        {
+            "name": "Python: Task New",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cline_cli.main",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "task",
+                "new",
+                "Test task"
+            ]
+        },
+        {
+            "name": "Python: Instance List",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cline_cli.main",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "instance",
+                "list"
+            ]
+        },
+        {
+            "name": "Python: Config List",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cline_cli.main",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "config",
+                "list"
+            ]
+        },
+        {
+            "name": "Python: Version",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cline_cli.main",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "version"
+            ]
+        },
+        {
+            "name": "Python: Doctor",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cline_cli.main",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "doctor"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Run Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "tests/",
+                "-v"
+            ]
+        },
+        {
+            "name": "Python: Run Current Test File",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "${file}",
+                "-v"
+            ]
+        }
+    ]
+}
