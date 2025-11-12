@@ -469,7 +469,7 @@
 		"mammoth": "^1.11.0",
 		"nice-grpc": "^2.1.12",
 		"node-machine-id": "^1.1.12",
-		"ollama": "^0.5.13",
+		"ollama": "^0.6.2",
 		"open": "^10.1.2",
 		"open-graph-scraper": "^6.9.0",
 		"openai": "^4.83.0",
