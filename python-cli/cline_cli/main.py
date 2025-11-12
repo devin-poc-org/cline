@@ -59,6 +59,11 @@ def cli(ctx, prompt, address, verbose, output_format, images, files,
         core_address=address
     )
     
+    subcommands = set(ctx.command.commands.keys()) if hasattr(ctx.command, 'commands') else set()
+    argv_tokens = [t for t in sys.argv[1:] if not t.startswith('-')]
+    if argv_tokens and argv_tokens[0] in subcommands:
+        return
+    
     if ctx.invoked_subcommand is not None:
         return
     

@@ -2,6 +2,7 @@
 
 from prompt_toolkit import prompt
 from prompt_toolkit.styles import Style
+from prompt_toolkit.key_binding import KeyBindings
 
 
 def prompt_for_initial_task(address: str, mode: str) -> str:
@@ -24,14 +25,29 @@ def prompt_for_initial_task(address: str, mode: str) -> str:
         'prompt': '#ffcc00 bold',
     })
     
+    kb = KeyBindings()
+    
+    @kb.add('enter')
+    def _(event):
+        """Accept input on Enter."""
+        event.current_buffer.validate_and_handle()
+    
+    @kb.add('escape', 'enter')
+    def _(event):
+        """Insert newline on Esc+Enter."""
+        event.current_buffer.insert_text('\n')
+    
     try:
+        print("Start a new Cline task")
+        print("What would you like Cline to help you with?")
+        print("(Press Enter to submit, Esc+Enter for new line, Ctrl+C to cancel)\n")
+        
         user_input = prompt(
-            "Start a new Cline task\n"
-            "What would you like Cline to help you with?\n"
             "> ",
             multiline=True,
-            style=style
+            style=style,
+            key_bindings=kb
         )
         return user_input.strip()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         return ""
