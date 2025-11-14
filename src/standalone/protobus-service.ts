@@ -28,17 +28,88 @@ export function startProtobusService(controller: Controller): Promise<string> {
 		})
 		reflection.addToServer(server)
 
-		// Start the server.
-		const host = process.env.PROTOBUS_ADDRESS || `127.0.0.1:${PROTOBUS_PORT}`
-		server.bindAsync(host, grpc.ServerCredentials.createInsecure(), (err) => {
-			if (err) {
-				log(`Could not start ProtoBus service: Failed to bind to ${host}, port may be unavailable. ${err.message}`)
-				reject(new Error(`Failed to bind ProtoBus to ${host}: ${err.message}`))
-				return
+		const bindMode = process.env.PROTOBUS_BIND || "auto"
+
+		// Start the server with appropriate bind addresses
+		if (process.env.PROTOBUS_ADDRESS) {
+			const host = process.env.PROTOBUS_ADDRESS
+			bindAndStart(server, host, resolve, reject)
+		} else if (bindMode === "ipv6") {
+			const host = `[::1]:${PROTOBUS_PORT}`
+			bindAndStart(server, host, resolve, reject)
+		} else if (bindMode === "ipv4") {
+			const host = `127.0.0.1:${PROTOBUS_PORT}`
+			bindAndStart(server, host, resolve, reject)
+		} else {
+			bindDualStack(server, PROTOBUS_PORT, resolve, reject)
+		}
+	})
+}
+
+function bindAndStart(server: grpc.Server, host: string, resolve: (value: string) => void, reject: (reason: Error) => void) {
+	server.bindAsync(host, grpc.ServerCredentials.createInsecure(), (err) => {
+		if (err) {
+			log(`Could not start ProtoBus service: Failed to bind to ${host}, port may be unavailable. ${err.message}`)
+			reject(new Error(`Failed to bind ProtoBus to ${host}: ${err.message}`))
+			return
+		}
+		server.start()
+		log(`ProtoBus gRPC server listening on ${host}`)
+
+		const proxyVars = ["http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "no_proxy"]
+		const activeProxies = proxyVars.filter((v) => process.env[v])
+		if (activeProxies.length > 0) {
+			log(`Proxy environment variables detected: ${activeProxies.join(", ")}`)
+			const noProxy = process.env.NO_PROXY || process.env.no_proxy || ""
+			if (!noProxy.includes("127.0.0.1") && !noProxy.includes("localhost")) {
+				log(
+					"WARNING: Proxy is configured but 127.0.0.1 and localhost are not in NO_PROXY. " +
+						"This may cause connection issues, especially on VPN. " +
+						"Consider setting NO_PROXY=localhost,127.0.0.1,[::1]",
+				)
 			}
+		}
+
+		resolve(host)
+	})
+}
+
+function bindDualStack(server: grpc.Server, port: number, resolve: (value: string) => void, reject: (reason: Error) => void) {
+	const ipv4Host = `127.0.0.1:${port}`
+	server.bindAsync(ipv4Host, grpc.ServerCredentials.createInsecure(), (err) => {
+		if (err) {
+			log(`Could not bind ProtoBus to IPv4 (${ipv4Host}): ${err.message}`)
+			reject(new Error(`Failed to bind ProtoBus to ${ipv4Host}: ${err.message}`))
+			return
+		}
+
+		const ipv6Host = `[::1]:${port}`
+		server.bindAsync(ipv6Host, grpc.ServerCredentials.createInsecure(), (err) => {
+			if (err) {
+				log(`Could not bind ProtoBus to IPv6 (${ipv6Host}): ${err.message}`)
+				log(`ProtoBus will only be available on IPv4 (${ipv4Host})`)
+			} else {
+				log(`ProtoBus bound to both IPv4 (${ipv4Host}) and IPv6 (${ipv6Host})`)
+			}
+
 			server.start()
-			log(`ProtoBus gRPC server listening on ${host}`)
-			resolve(host)
+			log(`ProtoBus gRPC server listening on ${ipv4Host}`)
+
+			const proxyVars = ["http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "no_proxy"]
+			const activeProxies = proxyVars.filter((v) => process.env[v])
+			if (activeProxies.length > 0) {
+				log(`Proxy environment variables detected: ${activeProxies.join(", ")}`)
+				const noProxy = process.env.NO_PROXY || process.env.no_proxy || ""
+				if (!noProxy.includes("127.0.0.1") && !noProxy.includes("localhost")) {
+					log(
+						"WARNING: Proxy is configured but 127.0.0.1 and localhost are not in NO_PROXY. " +
+							"This may cause connection issues, especially on VPN. " +
+							"Consider setting NO_PROXY=localhost,127.0.0.1,[::1]",
+					)
+				}
+			}
+
+			resolve(ipv4Host)
 		})
 	})
 }
